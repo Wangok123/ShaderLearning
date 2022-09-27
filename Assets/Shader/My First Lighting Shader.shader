@@ -2,7 +2,7 @@
 
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Custom/My First Shader"
+Shader "Custom/My First Lighting Shader"
 {
 	Properties{
 		_Tint("Tint", Color) = (1,1,1,1)
@@ -26,22 +26,26 @@ Shader "Custom/My First Shader"
 			struct Interpolators {
 				float4 position : SV_POSITION;
 				float2 uv : TEXCOORD0;
+				float3 normal : TEXCOORD1;
 			};
 
 			struct VertexData {
 				float4 position : POSITION;
 				float2 uv : TEXCOORD0;
+				float3 normal : NORMAL;
 			};
 
 			Interpolators MyVertexProgram (VertexData v) {
 				Interpolators i;
 				i.position = UnityObjectToClipPos(v.position);
 				i.uv = v.uv * _MainTex_ST.xy + _MainTex_ST.zw;
+				i.normal = mul(unity_ObjectToWorld, float4(v.normal, 0));
+				i.normal = normalize(i.normal);
 				return i;
 			}
 
 			float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
-				return tex2D(_MainTex, i.uv) * _Tint;
+				return float4(i.normal,1);
 			}
 
 			ENDCG
